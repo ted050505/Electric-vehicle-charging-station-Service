@@ -37,7 +37,7 @@
 		.then(res => res.json())
 		.then(myJson => {
 			// document.getElementById('data').innerText = JSON.stringify(myJson, null, 1);
-			// console.log(JSON.stringify(myJson, null, 1));
+			console.log(JSON.stringify(myJson, null, 1));
 			
 			const items = myJson.items;
 			console.log(items.item.length);
@@ -48,13 +48,34 @@
 					map: map // 마커를 표시할 지도 객체
 				});
 
+				let stat = ""
+				switch (items.item[i]['stat']) {
+					case '1' :
+						stat = "통신이상"
+						break;
+					case '2' :
+						stat = "충전대기"
+						break;
+					case '3' :
+						stat = "충전중"
+						break;
+					case '4' :
+						stat = "운영중지"
+						break;
+					case '5' :
+						stat = "점검중"
+						break;
+					case '9' :
+						stat = "상태 미확인"
+						break;
+				}
+
 				// 마커 위에 표시할 인포윈도우를 생성한다
 				var infowindow = new kakao.maps.InfoWindow({
-					content : items.item[i]['statNm'] // 인포윈도우에 표시할 내용
+					content : items.item[i]['statNm'] + "<br/>" + stat// 인포윈도우에 표시할 내용
 				});
 				// 인포윈도우를 지도에 표시한다
 				infowindow.open(map, marker);
-				
 			}
  		})
 	</script>
