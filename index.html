@@ -8,7 +8,7 @@
 <body>
 	<div id="map" style="width:750px;height:500px;"></div>
     <div style="padding:5px;"></div>
-    
+
 	<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=1848e7e473f0d3ce0ef13839f3ac3292"></script>
 	<script>
 		var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
@@ -27,20 +27,35 @@
         // 지도의 우측에 확대 축소 컨트롤을 추가한다
         map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
 
-        // 지도에 마커를 생성하고 표시한다
-		var marker = new kakao.maps.Marker({
-		    position: new kakao.maps.LatLng(37.56304, 126.97765), // 마커의 좌표
-		    map: map // 마커를 표시할 지도 객체
-		});
-
-        // 마커 위에 표시할 인포윈도우를 생성한다
-        var infowindow = new kakao.maps.InfoWindow({
-		    content : '<div style="padding:5px;">충전기 상태 :</div>' // 인포윈도우에 표시할 내용
-		});
-
         // 인포윈도우를 지도에 표시한다
 		infowindow.open(map, marker);
 
+	</script>
+    
+	<p id="data"></p>
+	<script>
+		const url = 'http://apis.data.go.kr/B552584/EvCharger/getChargerInfo?serviceKey=01WLGxbKXnjN3rE8LYR2E4q%2Bcg8DLmMXttqdG18q9%2BPYi2vLh1MxlMmqeCT45SxAd7dInYCEBlfXjq7CAu5kWw%3D%3D&numOfRows=100&pageNo=1&dataType=JSON';
+
+		fetch(url)
+		.then(res => res.json())
+		.then(myJson => {
+			// document.getElementById('data').innerText = JSON.stringify(myJson, null, 1);
+			console.log(JSON.stringify(myJson, null, 1));
+
+			const station = myJson.station;
+			for (var i=0; i < station.length; i++) {
+				// 지도에 마커를 생성하고 표시한다
+				var marker = new kakao.maps.Marker({
+				position: new kakao.maps.LatLng(station['lat'], station['lng']), // 마커의 좌표
+				map: map // 마커를 표시할 지도 객체
+				});
+
+				// 마커 위에 표시할 인포윈도우를 생성한다
+				var infowindow = new kakao.maps.InfoWindow({
+					content : '<div style="padding:5px;">충전기 상태 :</div>' // 인포윈도우에 표시할 내용
+				});
+			}
+ 		})
 	</script>
 </body>
 </html>
