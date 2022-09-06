@@ -45,38 +45,50 @@
 				// 지도에 마커를 생성하고 표시한다
 				var marker = new kakao.maps.Marker({
 					position: new kakao.maps.LatLng(items.item[i]['lat'], items.item[i]['lng']), // 마커의 좌표
-					map: map // 마커를 표시할 지도 객체
+					// map: map // 마커를 표시할 지도 객체
+					clickable: true // 마커를 클릭했을 때 지도의 클릭 이벤트가 발생하지 않도록 설정합니다
 				});
+
+				// 마커를 지도에 표시합니다.
+				marker.setMap(map);
 
 				let stat = ""
 				switch (items.item[i]['stat']) {
 					case '1' :
-						stat = "통신이상"
+						stat = "충전기 상태 : " + "통신이상"
 						break;
 					case '2' :
-						stat = "충전대기"
+						stat = "충전기 상태 : " + "충전대기"
 						break;
 					case '3' :
-						stat = "충전중"
+						stat = "충전기 상태 : " + "충전중"
 						break;
 					case '4' :
-						stat = "운영중지"
+						stat = "충전기 상태 : " + "운영중지"
 						break;
 					case '5' :
-						stat = "점검중"
+						stat = "충전기 상태 : " + "점검중"
 						break;
 					case '9' :
-						stat = "상태 미확인"
+						stat = "충전기 상태 : " + "상태 미확인"
 						break;
 				}
-				let useTime = items.item[i]['useTime']
+				let useTime = "이용 가능 시간 : " + items.item[i]['useTime']
+
+				var iwContent = items.item[i]['statNm'] + "<br/>" + stat + "<br/>" + useTime + "<br/>", // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
+   				iwRemoveable = true; // removeable 속성을 ture 로 설정하면 인포윈도우를 닫을 수 있는 x버튼이 표시됩니다
 
 				// 마커 위에 표시할 인포윈도우를 생성한다
 				var infowindow = new kakao.maps.InfoWindow({
-					content : items.item[i]['statNm'] + "<br/>" + stat + "<br/>" + useTime// 인포윈도우에 표시할 내용
+					content : iwContent // 인포윈도우에 표시할 내용
+					removable : iwRemoveable
 				});
-				// 인포윈도우를 지도에 표시한다
-				infowindow.open(map, marker);
+
+				// 마커에 클릭이벤트를 등록합니다
+				kakao.maps.event.addListener(marker, 'click', function() {
+					// 마커 위에 인포윈도우를 표시합니다
+					infowindow.open(map, marker);  
+				});
 			}
  		})
 	</script>
