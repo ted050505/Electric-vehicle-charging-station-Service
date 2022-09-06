@@ -69,10 +69,11 @@
 						stat = "상태 미확인"
 						break;
 				}
+				let useTime = items.item[i]['useTime']
 
 				// 마커 위에 표시할 인포윈도우를 생성한다
 				var infowindow = new kakao.maps.InfoWindow({
-					content : items.item[i]['statNm'] + "<br/>" + stat// 인포윈도우에 표시할 내용
+					content : items.item[i]['statNm'] + "<br/>" + stat + "<br/>" + useTime// 인포윈도우에 표시할 내용
 				});
 				// 인포윈도우를 지도에 표시한다
 				infowindow.open(map, marker);
