@@ -24,16 +24,6 @@
 		var zoomControl = new kakao.maps.ZoomControl();
         // 지도의 우측에 확대 축소 컨트롤을 추가한다
         map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
-
-		// 마커가 표시될 위치입니다 
-		var userMarkerPosition  = new kakao.maps.LatLng(33.450701, 126.570667); 
-		// 마커를 생성합니다
-		var userMarker = new kakao.maps.Marker({
-			position: markerPosition
-		});
-		// 마커가 지도 위에 표시되도록 설정합니다
-		userMarker.setMap(map);
-
 	</script>
     
 	<p id="data"></p>
@@ -43,8 +33,7 @@
 		fetch(url)
 		.then(res => res.json())
 		.then(myJson => {
-			// document.getElementById('data').innerText = JSON.stringify(myJson, null, 1);
-			console.log(JSON.stringify(myJson, null, 1));
+			// console.log(JSON.stringify(myJson, null, 1));
 			
 			const items = myJson.items;
 			for (var i = 0; i < items.item.length; i++) {
@@ -98,14 +87,23 @@
  		})
 	</script>
 	<script>
+		var latitude ;
+		var longitude;
 		// 사용자 위치 정보 구하는 함수.
         function success({ coords, timestamp }) {
-            const latitude = coords.latitude;   // 위도
-            const longitude = coords.longitude; // 경도
+            latitude = coords.latitude;   // 위도
+            longitude = coords.longitude; // 경도
             
-            // alert(`위도: ${latitude}, 경도: ${longitude}`);
-			console.log(`위도: ${latitude}, 경도: ${longitude}`);
-        }
+			console.log(latitude, longitude);
+			// 마커가 표시될 위치입니다 
+			var userMarkerPosition  = new kakao.maps.LatLng(latitude, longitude); 
+			// 마커를 생성합니다
+			var userMarker = new kakao.maps.Marker({
+				position: userMarkerPosition
+			});
+			// 마커가 지도 위에 표시되도록 설정합니다
+			userMarker.setMap(map);
+		}
 		// 사용자 위치 정보 요청 함수.
         function getUserLocation() {
             if (!navigator.geolocation) {
@@ -115,6 +113,9 @@
 			navigator.geolocation.watchPosition(success); // 사용자의 위치가 변경 될 때마다 콜백 함수 호출.
         }
         getUserLocation(); // 함수 호출.
+
+		
+
     </script>
 </body>
 </html>
