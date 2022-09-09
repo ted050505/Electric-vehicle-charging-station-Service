@@ -1,121 +1,141 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>전기차 충전소 정보</title>
-</head>
-<body>
-	<div id="map" style="width:100%; height:100vh;"></div>
-    <div style="padding:5px;"></div>
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="main.css">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>전기차 충전소 정보</title>
+	</head>
+	<body>
+		<div id="map">
+			<button id="getMyPositionBtn" type="button" class="btn btn-lg btn-primary">내 위치</button>
 
-	<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=1848e7e473f0d3ce0ef13839f3ac3292"></script>
-	<script>
-		var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
-		    mapOption = {
-		        center: new kakao.maps.LatLng(37.56655, 126.98040), // 지도의 중심좌표
-		        level: 3, // 지도의 확대 레벨
-		        mapTypeId : kakao.maps.MapTypeId.ROADMAP // 지도종류
-		    }; 
-		// 지도를 생성한다 
-		var map = new kakao.maps.Map(mapContainer, mapOption); 
+			<!-- 부트스트랩 이용을 위한 jQuery와 CDN -->
+			<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+			<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+			<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+		</div>
+		<div style="padding:5px;"></div>
 
-        // 지도에 확대 축소 컨트롤을 생성한다
-		var zoomControl = new kakao.maps.ZoomControl();
-        // 지도의 우측에 확대 축소 컨트롤을 추가한다
-        map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
-	</script>
-    
-	<p id="data"></p>
-	<script>
-		const url = 'http://apis.data.go.kr/B552584/EvCharger/getChargerInfo?serviceKey=01WLGxbKXnjN3rE8LYR2E4q%2Bcg8DLmMXttqdG18q9%2BPYi2vLh1MxlMmqeCT45SxAd7dInYCEBlfXjq7CAu5kWw%3D%3D&numOfRows=100&pageNo=1&dataType=JSON';
-
-		fetch(url)
-		.then(res => res.json())
-		.then(myJson => {
-			// console.log(JSON.stringify(myJson, null, 1));
-			
-			const items = myJson.items;
-			for (var i = 0; i < items.item.length; i++) {
-				// 지도에 마커를 생성하고 표시한다
-				var marker = new kakao.maps.Marker({
-					position: new kakao.maps.LatLng(items.item[i]['lat'], items.item[i]['lng']), // 마커의 좌표
-					clickable: true, // 마커를 클릭했을 때 지도의 클릭 이벤트가 발생하지 않도록 설정합니다
-				});
-
-				let stat = ""
-				switch (items.item[i]['stat']) {
-					case '1' :
-						stat = "충전기 상태 : " + "통신이상"
-						break;
-					case '2' :
-						stat = "충전기 상태 : " + "충전대기"
-						break;
-					case '3' :
-						stat = "충전기 상태 : " + "충전중"
-						break;
-					case '4' :
-						stat = "충전기 상태 : " + "운영중지"
-						break;
-					case '5' :
-						stat = "충전기 상태 : " + "점검중"
-						break;
-					case '9' :
-						stat = "충전기 상태 : " + "상태 미확인"
-						break;
-				}
-				let useTime = "이용 가능 시간 : " + items.item[i]['useTime']
-
-				var iwContent = items.item[i]['statNm'] + "<br/>" + stat + "<br/>" + useTime + "<br/>", // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
-   				iwRemoveable = true; // removeable 속성을 true 로 설정하면 인포윈도우를 닫을 수 있는 x버튼이 표시됩니다
-				
-				// 마커를 지도에 표시합니다.
-				marker.setMap(map);
-
-				// 마커 위에 표시할 인포윈도우를 생성한다
-				var infowindow = new kakao.maps.InfoWindow({
-					content : iwContent, // 인포윈도우에 표시할 내용
-					removable : iwRemoveable
-				});
-
-				// 마커에 클릭이벤트를 등록합니다
-				kakao.maps.event.addListener(marker, 'click', function() {
-					// 마커 위에 인포윈도우를 표시합니다
-					infowindow.open(map, marker);  
-				});
+		<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=1848e7e473f0d3ce0ef13839f3ac3292"></script>
+		<script>
+			var latitude ;
+			var longitude;
+			// 사용자 위치 정보 구하는 함수.
+			function success({ coords }) {
+				latitude = coords.latitude;   // 위도
+				longitude = coords.longitude; // 경도
 			}
- 		})
-	</script>
-	<script>
-		var latitude ;
-		var longitude;
-		// 사용자 위치 정보 구하는 함수.
-        function success({ coords, timestamp }) {
-            latitude = coords.latitude;   // 위도
-            longitude = coords.longitude; // 경도
-            
-			console.log(latitude, longitude);
-			// 마커가 표시될 위치입니다 
-			var userMarkerPosition  = new kakao.maps.LatLng(latitude, longitude); 
-			// 마커를 생성합니다
-			var userMarker = new kakao.maps.Marker({
-				position: userMarkerPosition
-			});
-			// 마커가 지도 위에 표시되도록 설정합니다
-			userMarker.setMap(map);
-		}
-		// 사용자 위치 정보 요청 함수.
-        function getUserLocation() {
-            if (!navigator.geolocation) {
-                throw "위치 정보가 지원되지 않습니다.";
-            }
-            // navigator.geolocation.getCurrentPosition(success); // 사용자의 현재 위치 요청.
-			navigator.geolocation.watchPosition(success); // 사용자의 위치가 변경 될 때마다 콜백 함수 호출.
-        }
-        getUserLocation(); // 함수 호출.
+			// 사용자 위치 정보 요청 함수.
+			function getUserLocation() {
+				if (!navigator.geolocation) {
+					throw "위치 정보가 지원되지 않습니다.";
+				}
+				// navigator.geolocation.getCurrentPosition(success); // 사용자의 현재 위치 요청.
+				navigator.geolocation.watchPosition(success); // 사용자의 위치가 변경 될 때마다 콜백 함수 호출.
+			}
+			getUserLocation(); // 함수 호출.
 
-		
+			
+			var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
+				mapOption = {
+					center: new kakao.maps.LatLng(37.56655, 126.98040), // 지도의 중심좌표
+					level: 3, // 지도의 확대 레벨
+					mapTypeId : kakao.maps.MapTypeId.ROADMAP // 지도종류
+				}; 
+			// 지도를 생성한다 
+			var map = new kakao.maps.Map(mapContainer, mapOption); 
+			// 지도에 확대 축소 컨트롤을 생성한다
+			var zoomControl = new kakao.maps.ZoomControl();
+			// 지도의 우측에 확대 축소 컨트롤을 추가한다
+			map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
 
-    </script>
-</body>
+			function locationLoadSuccess(pos){
+				// 현재 위치 받아오기
+				var currentPos = new kakao.maps.LatLng(pos.coords.latitude,pos.coords.longitude);
+
+				// 지도 이동(기존 위치와 가깝다면 부드럽게 이동)
+				map.panTo(currentPos);
+
+				// 마커 생성
+				var marker = new kakao.maps.Marker({
+					position: currentPos
+				});
+
+				// 기존에 마커가 있다면 제거
+				marker.setMap(null);
+				marker.setMap(map);
+			}
+
+			function locationLoadError(pos){
+				alert('위치 정보를 가져오는데 실패했습니다.');
+			};
+
+			// 위치 가져오기 버튼 클릭시
+			function getCurrentPosBtn(){
+				navigator.geolocation.getCurrentPosition(locationLoadSuccess,locationLoadError);
+			};
+
+		</script>
+		<p id="data"></p>
+		<script>
+			const url = 'http://apis.data.go.kr/B552584/EvCharger/getChargerInfo?serviceKey=01WLGxbKXnjN3rE8LYR2E4q%2Bcg8DLmMXttqdG18q9%2BPYi2vLh1MxlMmqeCT45SxAd7dInYCEBlfXjq7CAu5kWw%3D%3D&numOfRows=100&pageNo=1&dataType=JSON';
+
+			fetch(url)
+			.then(res => res.json())
+			.then(myJson => {
+				// console.log(JSON.stringify(myJson, null, 1));
+				
+				const items = myJson.items;
+				for (var i = 0; i < items.item.length; i++) {
+					// 지도에 마커를 생성하고 표시한다
+					var marker = new kakao.maps.Marker({
+						position: new kakao.maps.LatLng(items.item[i]['lat'], items.item[i]['lng']), // 마커의 좌표
+						clickable: true, // 마커를 클릭했을 때 지도의 클릭 이벤트가 발생하지 않도록 설정합니다
+					});
+
+					let stat = ""
+					switch (items.item[i]['stat']) {
+						case '1' :
+							stat = "충전기 상태 : " + "통신이상"
+							break;
+						case '2' :
+							stat = "충전기 상태 : " + "충전대기"
+							break;
+						case '3' :
+							stat = "충전기 상태 : " + "충전중"
+							break;
+						case '4' :
+							stat = "충전기 상태 : " + "운영중지"
+							break;
+						case '5' :
+							stat = "충전기 상태 : " + "점검중"
+							break;
+						case '9' :
+							stat = "충전기 상태 : " + "상태 미확인"
+							break;
+					}
+					let useTime = "이용 가능 시간 : " + items.item[i]['useTime']
+
+					var iwContent = items.item[i]['statNm'] + "<br/>" + stat + "<br/>" + useTime + "<br/>", // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
+					iwRemoveable = true; // removeable 속성을 true 로 설정하면 인포윈도우를 닫을 수 있는 x버튼이 표시됩니다
+					
+					// 마커를 지도에 표시합니다.
+					marker.setMap(map);
+
+					// 마커 위에 표시할 인포윈도우를 생성한다
+					var infowindow = new kakao.maps.InfoWindow({
+						content : iwContent, // 인포윈도우에 표시할 내용
+						removable : iwRemoveable
+					});
+
+					// 마커에 클릭이벤트를 등록합니다
+					kakao.maps.event.addListener(marker, 'click', function() {
+						// 마커 위에 인포윈도우를 표시합니다
+						infowindow.open(map, marker);  
+					});
+				}
+			})
+		</script>
+	</body>
 </html>
